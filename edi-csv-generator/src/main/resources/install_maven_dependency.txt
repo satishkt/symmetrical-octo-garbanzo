@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=/Users/satish/Work/edireader/target/edireader-5.6.5.jar -DpomFile=/Users/satish/Work/edireader/target/edireader-5.6.5.pom
