@@ -1,6 +1,7 @@
 package com.mango.edi.clm.parser;
 
 import com.berryworks.edireader.EDIReader;
+import com.berryworks.edireader.util.XmlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,8 @@ public class EDIToCSVParsingEngine {
     private String outputXmlPath;
     @Value("${output.csv.file.path}")
     private String outputCsvPath;
+    @Value("${is.indenting.enabled}")
+    private boolean isIndentingEnabled;
 
 
     public void execute() {
@@ -63,7 +66,8 @@ public class EDIToCSVParsingEngine {
         //get the file name from file path
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."));
         SAXSource source = new SAXSource(ediReader, new InputSource(reader));
-        var writer = createWriter(fileName + ".xml");
+        // Create a writer for the output file
+        var writer = createWriter(outputXmlPath + fileName + ".xml");
         // Use a StreamResult to capture the generated XML output
         StreamResult result = new StreamResult(writer);
         // Use a Transformer to generate XML output from the parsed input
@@ -93,6 +97,11 @@ public class EDIToCSVParsingEngine {
             generatedOutput = new OutputStreamWriter(new FileOutputStream(
                     outputFileName), StandardCharsets.ISO_8859_1);
             System.out.println("Output file " + outputFileName + " opened");
+            if (isIndentingEnabled) {
+                // Wrap the Writer for the generated output with an indenting filter
+                generatedOutput = new XmlFormatter(generatedOutput);
+            }
+
         } catch (IOException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e.getMessage());
